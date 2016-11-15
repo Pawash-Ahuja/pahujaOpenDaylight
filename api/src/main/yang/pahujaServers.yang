@@ -1,0 +1,54 @@
+module pahujaServers {
+
+ yang-version 1; 
+
+namespace
+      "nokia:pahuja:pahujaServers"; 
+
+prefix pahujaServers;
+
+organization "Nokia";
+
+contact
+"pawash.ahuja@nokia.com";
+
+description
+"Test module";
+
+  container servers
+  {
+    config true;
+    list server
+    {
+      key name;
+      leaf name
+      {
+        type string;
+      }
+      list addr
+      {
+        key "ip port";
+        leaf ip
+            {
+              type uint32;
+            }
+            leaf port
+            {
+              type uint16;
+            }
+            leaf protocol
+            {
+              type uint8;
+            }
+            leaf-list apps
+            {
+              type string;
+            }
+          }
+          leaf my_test
+          {
+            type string;
+          }
+    }
+  }
+}
