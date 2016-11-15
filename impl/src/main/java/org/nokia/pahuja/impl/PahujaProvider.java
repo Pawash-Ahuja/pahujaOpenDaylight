@@ -18,31 +18,46 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistr
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingListener;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketProcessingService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketReceived;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+
 import org.opendaylight.yangtools.concepts.Registration;
 public class PahujaProvider implements BindingAwareProvider, AutoCloseable, PacketProcessingListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(PahujaProvider.class);
     private ListenerRegistration<NotificationListener> listener;
     private List<Registration> registrations;
-//    public PahujaProvider(NotificationProviderService notificationProviderService){
+	private DataBroker dataBroker;
+	private PacketProcessingService packetProcessingService;
 
-  //  }
+   public PahujaProvider(DataBroker dataBroker, NotificationProviderService notificaitonService, RpcProviderRegistry rpcProviderRegistry) {
+	// TODO Auto-generated constructor stub
+
+	// Store DataBroker for reading/ writing from inventory store
+	this.dataBroker = dataBroker;
+
+	// Get access to the packet processing service for making RPC calls
+	this.packetProcessingService = rpcProviderRegistry.getRpcService(PacketProcessingService.class);
+
+	//List of registrations to track notifications for both data changed and yand defined registrations
+	this.registrations = Lists.newArrayList();
+
+	// Register to recieve notificaitons in case of events
+	// first event - packet in
+	registrations.add(notificaitonService.registerNotificationListener(this));
 
 
-	public PahujaProvider(@SuppressWarnings("deprecation") NotificationProviderService notificationProviderService) {
-		// TODO Auto-generated constructor stub
-		listener = notificationProviderService.registerNotificationListener(this);
-		registrations.add(listener);
-
-	}
+}
 	@Override
     public void onSessionInitiated(ProviderContext session) {
         LOG.info("PahujaProvider Session Initiated");

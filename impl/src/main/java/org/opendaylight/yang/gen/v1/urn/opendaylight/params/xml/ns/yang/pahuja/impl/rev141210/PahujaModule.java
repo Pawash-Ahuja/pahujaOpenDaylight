@@ -37,11 +37,16 @@ public class PahujaModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.
     @Override
     public java.lang.AutoCloseable createInstance() {
 
-	//throw new java.lang.UnsupportedOperationException();
-        PahujaProvider provider = new PahujaProvider(getNotificationServiceDependency());
-        getBrokerDependency().registerProvider(provider);
 
+
+    	DataBroker dataBroker = (DataBroker) getDataBrokerDependency();
+    	RpcProviderRegistry rpcRegistry = getRpcRegistryDependency();
+    	NotificationProviderService notificationService = getNotificationServiceDependency();
+
+        PahujaProvider provider = new PahujaProvider(getBroker(), getNotificationServiceDependency(), rpcProviderRegistry)
+        		getBrokerDependency().registerProvider(provider);
         return provider;
+
 
     }
 
