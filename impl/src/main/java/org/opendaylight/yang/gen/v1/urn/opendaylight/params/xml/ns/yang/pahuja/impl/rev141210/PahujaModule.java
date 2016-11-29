@@ -39,11 +39,11 @@ public class PahujaModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.
 
 
 
-    	DataBroker dataBroker = (DataBroker) getDataBrokerDependency();
+    	//DataBroker dataBroker = (DataBroker) getDataBrokerDependency();
     	RpcProviderRegistry rpcRegistry = getRpcRegistryDependency();
     	NotificationProviderService notificationService = getNotificationServiceDependency();
 
-        PahujaProvider provider = new PahujaProvider(getBroker(), getNotificationServiceDependency(), rpcProviderRegistry)
+        PahujaProvider provider = new PahujaProvider(notificationService, rpcRegistry);
         		getBrokerDependency().registerProvider(provider);
         return provider;
 

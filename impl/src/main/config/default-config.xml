@@ -21,7 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <name>pahuja-default</name>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
-            <name>binding-osgi-broker</name>  
+            <name>binding-osgi-broker</name>
         </broker>
 
 
@@ -31,6 +31,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             </type>
             <name>binding-notification-broker</name>
           </notification-service>
+
+          <rpc-registry>
+            <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
+              binding:binding-rpc-registry
+            </type>
+            <name>binding-rpc-broker</name>
+          </rpc-registry>
 
 <!--
           <data-broker>

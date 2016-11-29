@@ -40,11 +40,11 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 	private DataBroker dataBroker;
 	private PacketProcessingService packetProcessingService;
 
-   public PahujaProvider(DataBroker dataBroker, NotificationProviderService notificaitonService, RpcProviderRegistry rpcProviderRegistry) {
+   public PahujaProvider(NotificationProviderService notificaitonService, RpcProviderRegistry rpcProviderRegistry) {
 	// TODO Auto-generated constructor stub
 
 	// Store DataBroker for reading/ writing from inventory store
-	this.dataBroker = dataBroker;
+	//this.dataBroker = dataBroker;
 
 	// Get access to the packet processing service for making RPC calls
 	this.packetProcessingService = rpcProviderRegistry.getRpcService(PacketProcessingService.class);
