@@ -35,11 +35,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
 <!--    <feature version='1.1.0-SNAPSHOT'>odl-netconf-connector-all</feature>
     <feature version='${mdsal.version}'>odl-netconf-all</feature>  -->
-
-       <feature version="${project.version}">odl-openflowplugin-southbound</feature>
-        <feature version="${project.version}">odl-openflowplugin-flow-services</feature>
-        <feature version="${project.version}">odl-openflowplugin-flow-services-rest</feature>
-        <feature version="${project.version}">odl-openflowplugin-flow-services-ui</feature>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-all</feature> 
+        <feature version="${openflowplugin.version}">odl-openflowplugin-all</feature>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services-rest</feature>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services-ui</feature>
 
     <feature version='${project.version}'>odl-pahuja-api</feature>
     <bundle>mvn:org.nokia.pahuja/pahuja-impl/{{VERSION}}</bundle>
