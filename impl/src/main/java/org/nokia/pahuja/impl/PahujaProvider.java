@@ -49,7 +49,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 	// Get access to the packet processing service for making RPC calls
 	this.packetProcessingService = rpcProviderRegistry.getRpcService(PacketProcessingService.class);
 
-	//List of registrations to track notifications for both data changed and yand defined registrations
+	//List of registrations to track notifications for both data changed and yang defined registrations
 	this.registrations = Lists.newArrayList();
 
 	// Register to recieve notificaitons in case of events
@@ -61,10 +61,8 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 	@Override
     public void onSessionInitiated(ProviderContext session) {
         LOG.info("PahujaProvider Session Initiated");
-        System.out.println("Hiiiiiiii!");
+        System.out.println("Nokia Controller started!!!");
 //      DataBroker db = session.getSALService(DataBroker.class);
-
-
 
     }
 
