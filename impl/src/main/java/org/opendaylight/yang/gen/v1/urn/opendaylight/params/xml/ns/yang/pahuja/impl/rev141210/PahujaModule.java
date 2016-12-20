@@ -37,15 +37,16 @@ public class PahujaModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.
     @Override
     public java.lang.AutoCloseable createInstance() {
 
-
-
-    	//DataBroker dataBroker = (DataBroker) getDataBrokerDependency();
+       	//DataBroker dataBroker = (DataBroker) getDataBrokerDependency();
     	RpcProviderRegistry rpcRegistry = getRpcRegistryDependency();
     	NotificationProviderService notificationService = getNotificationServiceDependency();
+    	DataBroker dataBroker = getDataBrokerDependency();
 
-        PahujaProvider provider = new PahujaProvider(notificationService, rpcRegistry);
-        		getBrokerDependency().registerProvider(provider);
+        PahujaProvider provider = new PahujaProvider(notificationService, rpcRegistry,dataBroker);
+
+        getBrokerDependency().registerProvider(provider);
         return provider;
+
 
 
     }
