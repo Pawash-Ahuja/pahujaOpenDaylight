@@ -1,3 +1,11 @@
+/*
+ * Copyright © 2015 Nokia, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.nokia.pahuja.InitialFlowWriter;
 
 import java.math.BigInteger;
@@ -23,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowModFlags;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
@@ -51,7 +60,7 @@ public class LlldpFlow {
 	public void addFlow(NodeId nodeId , NodeUpdated notification, DataBroker dataBroker){
 
 
-
+		try{
 		MatchBuilder matchBuilder = new MatchBuilder();
     	EthernetMatchBuilder ethernetMatchBuilder = new EthernetMatchBuilder();
     	EthernetTypeBuilder ethernetTypeBuilder = new EthernetTypeBuilder();
@@ -72,6 +81,7 @@ public class LlldpFlow {
     	OutputActionBuilder outputActionBuilderContoller = new OutputActionBuilder();
     	Uri controller = new Uri(OutputPortValues.CONTROLLER.toString());
     	outputActionBuilderContoller.setOutputNodeConnector(controller);
+    	outputActionBuilderContoller.setMaxLength(0xffff);
     	ab.setAction(new OutputActionCaseBuilder().setOutputAction(outputActionBuilderContoller.build()).build());
     	ab.setOrder(0);
     	ab.setKey(new ActionKey(0));
@@ -92,8 +102,6 @@ public class LlldpFlow {
 
     	//after wrapping now add the instructions to the flow
 
-
-
     	FlowBuilder flow = new FlowBuilder();
     	FlowId flowId = new FlowId("900");
     	//flow.setCookie(new FlowCookie(106));
@@ -103,11 +111,13 @@ public class LlldpFlow {
     	flow.setHardTimeout(0);
     	flow.setStrict(false);
     	flow.setTableId((short)1);
+    	//flow.setBufferId((long)(-1));
     	flow.setCookie(new FlowCookie(BigInteger.valueOf(900)));
-    	flow.setPriority(10000);
+    	flow.setPriority(60000);
     	flow.setInstructions(isb.build());
     	flow.setKey(new FlowKey(flowId));
     	flow.setMatch(matchBuilder.build());
+    	flow.setFlags(new FlowModFlags(true, false, false, false, true));
 
     	// now add to the datastore
 
@@ -123,6 +133,7 @@ public class LlldpFlow {
                 .build();
 
 
+
            //now the actual writing
            try{
            GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, flowIID, flow.build(), true);
@@ -130,7 +141,13 @@ public class LlldpFlow {
            catch (Exception e){
            	System.out.println("error in writing LLDP flow" + e);
            }
-           System.out.println("LLDP Flow written");
+
+		}catch (Exception e){
+
+			System.out.println("CATCH OF lldp");
+			e.printStackTrace();
+			System.out.println(e);
+		}
            return;
 	}
 

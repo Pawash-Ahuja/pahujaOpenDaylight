@@ -1,3 +1,10 @@
+/*
+ * Copyright © 2015 Nokia, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.nokia.pahuja.InitialFlowWriter;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -9,8 +16,8 @@ public class InitialStaticFlowWriter{
 
 
 
-	/* There are 2 tables
-	 * Table 0 and Table 1
+	/* There are 3 tables
+	 * Table 0,  Table 1 and Table 2
 	 * Table 0 will have all the Firewall rules from priority 1000 to 2000 (loaded dynamically)
 	 *
 	 * We will have 3 static entries:-
@@ -29,17 +36,19 @@ public class InitialStaticFlowWriter{
 		// TODO Auto-generated method stub
 
 
-		// go to controller in case of no match
+		// go to controller in case of no match - Table 1
 		new GoToController().addFlow(nodeId, notification, dataBroker);
 
+		// flood in case of no match
 		new Flood().addFlow(nodeId , notification, dataBroker);
+
+		// punt LLDP packets to Controller
+		new LlldpFlow().addFlow(nodeId, notification, dataBroker);
 
 		//Go to table 1 from 0 in case of no match
 		new NextTable().addFlow(nodeId, notification, dataBroker);
 
 
-
-		new LlldpFlow().addFlow(nodeId, notification, dataBroker);
 
 	}
 

@@ -198,7 +198,6 @@ public class MacTable {
        	ActionBuilder ab= new ActionBuilder();
        	OutputActionBuilder outputActionBuilder= new OutputActionBuilder();
        	Uri outputPort = new Uri(portNo);
-       	System.out.println(portNo);
        	outputActionBuilder.setOutputNodeConnector(outputPort);
        	ab.setAction(new OutputActionCaseBuilder().setOutputAction(outputActionBuilder.build()).build());
        	ab.setOrder(0);
