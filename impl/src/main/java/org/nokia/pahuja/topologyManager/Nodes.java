@@ -7,17 +7,26 @@
  */
 package org.nokia.pahuja.topologyManager;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public interface Nodes {
 
-	public HashSet<Integer> getInternalPorts(String nodeName);
+	public HashMap<Integer,HashSet<Integer>> getInternalPorts(String nodeName);
 	public HashSet<Integer> getExternalPorts(String nodeName);
-	public HashSet<Integer> getAllPorts(String nodeName);
+	public HashMap<Integer,HashSet<Integer>> getAllPorts(String nodeName);
+
 	public void addPort(String nodeName, int portNo);
 	public void removePort(String nodeName, int portNo);
 	public void addNode(String nodeName);
 	public void removeNode(String nodeName);
+	public HashSet<String> getAllNodes();
+
 	public void printNodeStats();
+	public void addVlanId(String nodeName, int portNo, List<Integer> vlanIds);
+	boolean containsNode(String nodeName);
+	boolean containsPort(String nodeName, int portNo);
+	boolean validateVlan(List<Integer> vlanIds);
 
 }

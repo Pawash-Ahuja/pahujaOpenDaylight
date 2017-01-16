@@ -1,0 +1,58 @@
+module setVlan {
+
+ yang-version 1;
+
+namespace
+      "nokia:pahuja:setVlan";
+
+prefix pahujaServers;
+
+organization "Nokia";
+
+contact
+"pawash.ahuja@nokia.com";
+
+description
+"Vlan Configuration module";
+
+revision "2017-01-05" {
+    description
+        "Initial revision";
+}
+
+rpc vlanConfiguration {
+	input{
+
+	    list OpenflowNodes
+	    {
+	        key "switchName";
+
+	        leaf switchName{
+
+	        	  description "name of the switch";
+	              type string;
+	              mandatory true;
+	        }
+	        leaf portNo{
+
+	        	  description " Enter port number";
+	              type uint16;
+	              mandatory true;
+
+	        }
+	        leaf-list vlanId{
+
+	        	  description "Configure Vlans for this port, plese note that VlanId 1 is not a valid Id";
+	              type uint16;
+	              min-elements 1;
+	        }
+	    }
+  }
+	output{
+
+		leaf result{
+			type string;
+			}
+		}
+	}
+}

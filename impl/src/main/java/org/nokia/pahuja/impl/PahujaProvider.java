@@ -10,6 +10,7 @@ package org.nokia.pahuja.impl;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import org.nokia.pahuja.macLearning.MacTable;
 import org.nokia.pahuja.topologyManager.NetworkTopology;
 import org.nokia.pahuja.topologyManager.NodeStats;
 import org.nokia.pahuja.utils.InventoryUtils;
+import org.nokia.pahuja.vlanCheck.Vlans;
 import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.LLDP;
 import org.opendaylight.controller.liblldp.LLDPTLV;
@@ -38,6 +40,7 @@ import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yang.gen.v1.nokia.pahuja.setvlan.rev170105.SetVlanService;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -109,6 +112,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 	private DataBroker dataBroker;
 	private PacketProcessingService packetProcessingService;
 	private SalFlowService salFlowService;
+	private RpcRegistration<SetVlanService> setVlanService;
 
 	public PahujaProvider(NotificationProviderService notificaitonService, RpcProviderRegistry rpcProviderRegistry, DataBroker dataBroker ) {
 		// TODO Auto-generated constructor stub
@@ -144,12 +148,28 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 
 //      DataBroker db = session.getSALService(DataBroker.class);
 
+
+        LOG.info("Set Vlan Service initiated");
+        setVlanService = session.addRpcImplementation(SetVlanService.class, new Vlans());
+
+
+
     }
 
     @Override
     public void close() throws Exception {
         LOG.info("PahujaProvider Closed");
         System.out.println("Bye");
+
+
+        // To do
+
+
+        // Clear the config datastore
+
+        if (setVlanService != null)
+        	setVlanService.close();
+
         this.listener.close();
         for (Registration registration : registrations) {
         	registration.close();
@@ -278,11 +298,18 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 			new NetworkTopology().removeNodeConnector(nodeName, portNo);
 
 			// remove port from NodeStats
+			new NodeStats().removePort(nodeName, portNo);
 
 		}
 		if (portStatus =="up"){
 
-			new NodeStats().addPort(nodeName, portNo);
+			/*  when a new port is added,
+			 *  1) add the port to nodeName
+			 *  2) tag the port as Vlan 0
+			 *  which by default does nothing
+			 */
+
+			new NodeStats().addPort(nodeName, portNo );
 		}
 
 
@@ -331,17 +358,22 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 		boolean result = new NetworkTopology().containsNode(nodeName);
 
 		// Node already exists and flows already added
+
 		if (result == true){
+
+			// to avoid duplicate events (which is happening in ODl
 			return;
 		}
 
 		else{
 
-			// add node To Network Topology
-			new NetworkTopology().addNode(nodeName);
 
 			// add node to NodeStats
 			new NodeStats().addNode(nodeName);
+			// add node To Network Topology
+			new NetworkTopology().addNode(nodeName);
+
+
 
 			RemoveFlowInputBuilder flowBuilder = new RemoveFlowInputBuilder();
 			flowBuilder.setBarrier(true);
@@ -501,7 +533,6 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 		// if the reason is timeout, delete it from config datastore
 		//System.out.println(notification.getRemovedReason());
 		//notification.getRemovedReason().isDELETE()
-
 		//System.out.println("SwitchFlowRemoved");
 		// On flow removal because of timeout, it will notify here
 		// remove from config datastore checking the cookie if it is

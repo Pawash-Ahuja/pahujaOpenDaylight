@@ -7,6 +7,8 @@
  */
 package org.nokia.pahuja.InitialFlowWriter;
 
+import org.nokia.pahuja.InitialFlowWriter.broadcast.Flood;
+import org.nokia.pahuja.InitialFlowWriter.broadcast.FloodGroup;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -39,14 +41,20 @@ public class InitialStaticFlowWriter{
 		// go to controller in case of no match - Table 1
 		new GoToController().addFlow(nodeId, notification, dataBroker);
 
-		// flood in case of no match
-		new Flood().addFlow(nodeId , notification, dataBroker);
+
 
 		// punt LLDP packets to Controller
 		new LlldpFlow().addFlow(nodeId, notification, dataBroker);
 
 		//Go to table 1 from 0 in case of no match
 		new NextTable().addFlow(nodeId, notification, dataBroker);
+
+		// check
+		new FloodGroup().addGroup(nodeId, notification, dataBroker);
+
+		// flood in case of no match
+		new Flood().addFlow(nodeId , notification, dataBroker);
+
 
 
 

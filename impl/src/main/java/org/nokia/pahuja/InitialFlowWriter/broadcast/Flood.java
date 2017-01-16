@@ -1,15 +1,26 @@
-package org.nokia.pahuja.InitialFlowWriter;
+/*
+ * Copyright © 2015 Nokia, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.nokia.pahuja.InitialFlowWriter.broadcast;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.nokia.pahuja.utils.GenericTransactionUtils;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.group.action._case.GroupActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
@@ -29,10 +40,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetDestinationBuilder;
@@ -40,6 +53,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+import com.google.common.util.concurrent.CheckedFuture;
+
+
+/* Loops have to be detected and removed accordingly before broadcasting the packet.
+ */
 public class Flood {
 
 	    public void addFlow(NodeId nodeId , NodeUpdated notification, DataBroker dataBroker){
@@ -48,20 +66,12 @@ public class Flood {
 		//  match for destination MAC FF:FF:FF:FF:FF:FF
 
 		MacAddress macAddress = new MacAddress("FF:FF:FF:FF:FF:FF");
-
 		MatchBuilder matchBuilder = new MatchBuilder();
-
     	EthernetMatchBuilder ethernetMatchBuilder = new EthernetMatchBuilder();
-
     	EthernetDestinationBuilder ethernetDestinationBuilder = new EthernetDestinationBuilder();
-
     	ethernetDestinationBuilder.setAddress(macAddress);
-
     	ethernetMatchBuilder.setEthernetDestination(ethernetDestinationBuilder.build());
-
     	matchBuilder.setEthernetMatch(ethernetMatchBuilder.build());
-
-
 
     	//add flow to flood the frame with priority 0
 
@@ -76,13 +86,20 @@ public class Flood {
 
 
     	// action to Flood the Frame
-    	ActionBuilder abFlood= new ActionBuilder();
+    	/*ActionBuilder abFlood= new ActionBuilder();
     	OutputActionBuilder outputActionBuilderFlood = new OutputActionBuilder();
     	Uri flood = new Uri(OutputPortValues.FLOOD.toString());
     	outputActionBuilderFlood.setOutputNodeConnector(flood);
     	abFlood.setAction(new OutputActionCaseBuilder().setOutputAction(outputActionBuilderFlood.build()).build());
-    	abFlood.setOrder(0);
+    	abFlood.setOrder(0);*/
     	//abFlood.setKey(new ActionKey(0));
+
+    	ActionBuilder abFlood= new ActionBuilder();
+    	GroupActionBuilder groupActionBuilder = new GroupActionBuilder();
+    	groupActionBuilder.setGroupId((long)4);
+    	groupActionBuilder.setGroup("0");
+    	abFlood.setAction(new GroupActionCaseBuilder().setGroupAction(groupActionBuilder.build()).build());
+    	abFlood.setOrder(0);
 
 
     	// now action list is ready
@@ -107,14 +124,15 @@ public class Flood {
 
     	flow.setFlowName("FLOOD");
     	flow.setIdleTimeout(0);
-       	flow.setCookie(new FlowCookie(BigInteger.valueOf(400)));
+     //  	flow.setCookie(new FlowCookie(BigInteger.valueOf(400)));
     	flow.setHardTimeout(0);
     	flow.setStrict(true);
     	flow.setTableId((short)2);
-    	flow.setPriority(30);
+    	flow.setPriority(12);
     	flow.setInstructions(isb.build());
     	flow.setKey(new FlowKey(flowId));
     	flow.setMatch(matchBuilder.build());
+    	flow.setStrict(false);
 
 
     	// now add to the datastore
@@ -132,13 +150,13 @@ public class Flood {
 
            //now the actual writing
            try{
-           GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, flowIID, flow.build(), true);
+        	   System.out.println("Flood flow group written");
+        	   GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, flowIID, flow.build(), true);
            }
            catch (Exception e){
-           	System.out.println("error in writing flow" + e);
+        	   System.out.println("error in writing flow" + e);
            }
-          // System.out.println("Flood Flow written");
-           return;
+         return;
 
 	}
 }

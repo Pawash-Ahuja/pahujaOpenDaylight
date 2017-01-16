@@ -1,9 +1,9 @@
 module pahujaServers {
 
- yang-version 1; 
+ yang-version 1;
 
 namespace
-      "nokia:pahuja:pahujaServers"; 
+      "nokia:pahuja:pahujaServers";
 
 prefix pahujaServers;
 

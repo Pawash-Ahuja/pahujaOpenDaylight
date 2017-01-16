@@ -1,5 +1,6 @@
 package org.nokia.pahuja.topologyManager;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public interface NetworkAdjacencyList {

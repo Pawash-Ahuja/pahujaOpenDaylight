@@ -12,36 +12,38 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import com.google.common.collect.HashMultimap;
-
 //keeps a list of all the Nodes and their ports for topology
-class Value{
 
-	int portNo;
-	String neighborNode;
-
-	Value (int portNo, String neighborNode){
-		this.portNo = portNo;
-		this.neighborNode = neighborNode;
-	}
-
-}
 
 // Toppolgy maintains all the internal ports' connection
 public class NetworkTopology implements NetworkAdjacencyList {
+
+	private class Value{
+
+		int portNo;
+		String neighborNode;
+		HashSet<Integer> vlanIds;
+
+		Value (int portNo, String neighborNode, HashSet<Integer> vlanIds){
+			this.portNo = portNo;
+			this.neighborNode = neighborNode;
+			this.vlanIds = vlanIds;
+		}
+	}
+
 
 	/*key = NodeName , Value = HashMap (key = portNo , value = neighborNode
 
 	Key       |            Value
 
-	N1				Key      |     Value
+	N1				Key      |           Value
 
-					port 1        port 2 , Node 2
-					port 2        port 1 , Node 3
+					port 1        VlanIds (HashSet)  , port 2 , Node 2
+					port 2        VlanIds (HashSet)  , port 1 , Node 3
 
-	N2				port 2        port 1 , Node 1
+	N2				port 2        VlanIds (HashSet) , port 1 , Node 1
 
-	N3 				port 1		  port 2 , Node 1
+	N3 				port 1		  VlanIds (HashSet) , port 2 , Node 1
 
 	*/
 	static HashMap<String, HashMap<Integer, Value>> hm = new HashMap<String, HashMap<Integer, Value>>();
@@ -106,15 +108,21 @@ public class NetworkTopology implements NetworkAdjacencyList {
 
 	@Override
 	public void addNodeConnector(String nodeName, int portNo, String neighborNodeName, int neighborPortNo) {
+
 		// Because first Node will come up, when Node Connector is up,
 		// both the nodes should already be in the topology
-		System.out.println(" Node Connector added");
+		//System.out.println(" Node Connector added");
+
 		try{
 			if (hm.containsKey(nodeName)){
 
-				hm.get(nodeName).put(portNo, new Value(neighborPortNo, neighborNodeName));
-				System.out.println("Node connector added");
-				printTopology();
+				// Get VlanIds from NodeStats to construct the topology
+
+				HashSet<Integer> vlan = new NodeStats().getVlanIds(nodeName, portNo );
+
+				hm.get(nodeName).put(portNo, new Value(neighborPortNo, neighborNodeName, vlan));
+				//System.out.println("Node connector added");
+				//printTopology();
 
 			}
 
@@ -180,7 +188,7 @@ public class NetworkTopology implements NetworkAdjacencyList {
 					for(Map.Entry<Integer, Value>  map : h.entrySet()){
 
 						System.out.print(map.getKey() + " --> ");
-						System.out.println(map.getValue().portNo + " , " + map.getValue().neighborNode);
+						System.out.println(map.getValue().portNo + " , " + map.getValue().neighborNode + " , " + map.getValue().vlanIds);
 					}
 				}
 
@@ -192,23 +200,26 @@ public class NetworkTopology implements NetworkAdjacencyList {
 	@Override
 	public HashSet<Integer> getExternalPorts(String nodeName) {
 
-		HashSet<Integer> ports = new HashSet<>();
+
+		// returns list of ports
+
+		HashSet<Integer> externalPorts = new HashSet<Integer>();
+
 
 		if (hm.containsKey(nodeName)){
 
 			HashMap<Integer, Value> nodeNamePorts = hm.get(nodeName);
 
-			for(Map.Entry<Integer, Value>  entry : nodeNamePorts.entrySet()){
+			if (nodeNamePorts != null){
 
-				ports.add(entry.getKey());
+				for(Map.Entry<Integer, Value>  entry : nodeNamePorts.entrySet()){
+
+					externalPorts.add(entry.getKey());
+				}
 			}
+
 		}
-		return ports;
+		return null;
 	}
-
-
-
-
-
 
 }
