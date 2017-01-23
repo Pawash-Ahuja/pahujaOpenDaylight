@@ -11,6 +11,6 @@ public interface NetworkAdjacencyList {
 	void addNodeConnector(String nodeName, int portNo, String neighborNodeName, int neighborPortNo) ;
 	void removeNodeConnector(String nodeName, int portNo);
 	boolean containsNode(String nodeName);
-	HashSet<Integer> getExternalPorts(String nodeName);
+	HashSet<Integer> getInternalPorts(String nodeName);
 
 }

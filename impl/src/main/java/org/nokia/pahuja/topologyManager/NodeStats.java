@@ -11,8 +11,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-// stats of all Nodes, their ports (both internal and external, and their vlantags
+import org.nokia.pahuja.utils.ConstantValues;
+
+// maintains stats of all Nodes, their ports (both internal and external, and their vlantags
+
 public class NodeStats implements Nodes {
 
 	static HashMap<String, HashMap<Integer, HashSet<Integer>>> nodeStats = new HashMap<>();
@@ -32,15 +36,17 @@ public class NodeStats implements Nodes {
 
 
 	@Override
-	public HashMap<Integer,HashSet<Integer>> getInternalPorts(String nodeName) {
+	public HashMap<Integer,HashSet<Integer>> getExternalPorts(String nodeName) {
 
 		if(nodeStats.containsKey(nodeName)){
 
 			// External Ports contains just port Nos.
-			HashSet<Integer> externalPorts = new NetworkTopology().getExternalPorts(nodeName);
+			HashSet<Integer> externalPorts = new InternalNetworkTopology().getInternalPorts(nodeName);
 
 			//All ports contains port Nos + VlanIds attached to them.
 			HashMap<Integer,HashSet<Integer>> allPorts = getAllPorts(nodeName);
+
+			// External ports = All ports - Internal Ports
 
 			for(int i : externalPorts){
 
@@ -56,9 +62,9 @@ public class NodeStats implements Nodes {
 	}
 
 	@Override
-	public HashSet<Integer> getExternalPorts(String nodeName) {
+	public HashSet<Integer> getInternalPorts(String nodeName) {
 
-		return new NetworkTopology().getExternalPorts(nodeName);
+		return new InternalNetworkTopology().getInternalPorts(nodeName);
 	}
 
 	@Override
@@ -80,14 +86,14 @@ public class NodeStats implements Nodes {
 
 		/*  when a new port is added,
 		 *  1) add the port to nodeName
-		 *  2) tag the port as Vlan 0
+		 *  2) no vlan is attached
 		 *  which by default does nothing
+		 *
 		 */
 
 		if (nodeStats.containsKey(nodeName)){
 
 			HashSet<Integer> vlans = new HashSet<Integer>();
-			vlans.add(0);
 			nodeStats.get(nodeName).put(portNo,vlans);
 			printNodeStats();
 		}
@@ -177,7 +183,7 @@ public class NodeStats implements Nodes {
 		for(int vlan: vlanIds){
 
 
-			if (vlan > 4096 || vlan < 1){
+			if (vlan > 125 || vlan < 1){
 
 				return false;
 			}
@@ -200,17 +206,44 @@ public class NodeStats implements Nodes {
 		printNodeStats();
 	}
 
-	public HashSet<Integer> getVlanIds(String nodeName, int portNo) {
-		// TODO Auto-generated method stub
-
-		return nodeStats.get(nodeName).get(portNo);
-	}
-
 	@Override
 	public HashSet<String> getAllNodes() {
 		// TODO Auto-generated method stub
 
 		return allNodes;
 	}
+
+	@Override
+	public HashSet<Integer> getPortsHavingVlanId(String nodeName, int vlanId) {
+		// TODO Auto-generated method stub
+
+		if (nodeStats.containsKey(nodeName)){
+
+			Set<Integer> allPorts = nodeStats.get(nodeName).keySet();
+			HashSet<Integer> ports = new HashSet();
+
+			/* 1) Store all the ports of nodename in Set
+			 * 2) Traverse all the ports
+			 * 3) Check if the port contains vlan id, if yes add to result
+			 */
+			for (int i : allPorts){
+
+				HashSet<Integer> vlans = nodeStats.get(nodeName).get(i);
+				// vlans contain all the vlans tagged to port
+				if (vlans.contains(vlanId)){
+					 // this port has vlanId, so add it to the list
+					ports.add(i);
+				}
+			}
+
+			// return all internal ports of nodeName with vlan id vlanId
+			// this includes all the external ports of vlan Id
+
+			return ports;
+		}
+
+		return null;
+	}
+
 
 }

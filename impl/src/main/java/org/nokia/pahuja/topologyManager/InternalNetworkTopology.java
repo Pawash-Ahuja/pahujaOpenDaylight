@@ -12,11 +12,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.nokia.pahuja.utils.ConstantValues;
+
 //keeps a list of all the Nodes and their ports for topology
 
 
 // Toppolgy maintains all the internal ports' connection
-public class NetworkTopology implements NetworkAdjacencyList {
+public class InternalNetworkTopology implements NetworkAdjacencyList {
 
 	private class Value{
 
@@ -118,7 +120,7 @@ public class NetworkTopology implements NetworkAdjacencyList {
 
 				// Get VlanIds from NodeStats to construct the topology
 
-				HashSet<Integer> vlan = new NodeStats().getVlanIds(nodeName, portNo );
+				HashSet<Integer> vlan = new ConstantValues().getAllVlans();
 
 				hm.get(nodeName).put(portNo, new Value(neighborPortNo, neighborNodeName, vlan));
 				//System.out.println("Node connector added");
@@ -198,23 +200,23 @@ public class NetworkTopology implements NetworkAdjacencyList {
 	}
 
 	@Override
-	public HashSet<Integer> getExternalPorts(String nodeName) {
+	public HashSet<Integer> getInternalPorts(String nodeName) {
 
 
 		// returns list of ports
 
-		HashSet<Integer> externalPorts = new HashSet<Integer>();
+		HashSet<Integer> internalPorts = new HashSet<Integer>();
 
 
 		if (hm.containsKey(nodeName)){
 
-			HashMap<Integer, Value> nodeNamePorts = hm.get(nodeName);
+			HashMap<Integer, Value> nodeNamePorts = hm.get(nodeName); // got all the Internal Ports
 
 			if (nodeNamePorts != null){
 
 				for(Map.Entry<Integer, Value>  entry : nodeNamePorts.entrySet()){
 
-					externalPorts.add(entry.getKey());
+					internalPorts.add(entry.getKey());
 				}
 			}
 

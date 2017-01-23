@@ -56,7 +56,7 @@ public class FloodGroup {
 
 		// create List of Bucket
 		BucketBuilder bucketBuilder = new BucketBuilder();
-		BucketId bucketId = new BucketId((long)9);
+		BucketId bucketId = new BucketId((long)1);
 		List<Bucket> bucketList = new ArrayList();
 
 

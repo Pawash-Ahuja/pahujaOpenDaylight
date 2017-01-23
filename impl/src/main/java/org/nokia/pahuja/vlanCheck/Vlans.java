@@ -34,8 +34,9 @@ public class Vlans implements SetVlanService  {
 			String nodeName = node.getSwitchName();
 			int portNo = node.getPortNo();
 
-			// Replace the existing Vlans, by default every port has Vlan 0
-			// and Vlan 0 is not operative.
+			// Replace the existing Vlans, by default every external port has no vlan tag
+			// and every internal port has all the possible vlan tags (Trunk) 1 to 125
+
 
 			List<Integer> vlanIds = node.getVlanId();
 			NodeStats obj = new NodeStats();
@@ -51,12 +52,30 @@ public class Vlans implements SetVlanService  {
 
 						// every field is correct
 						// populate NodeStats
-
-						new NodeStats().addVlanId(nodeName, portNo, vlanIds);
-
+						obj.addVlanId(nodeName, portNo, vlanIds);
 
 
-						// for this set of vlanIds, check for change in topology and rewrite the flows
+						/*rewrite the flood flows for the corresponding vlansIds
+						 *
+						 * Get all the ports corresponding to vlandIds and nodeName
+						 * and rewrite the flows on these vlan tables
+						 *
+						 */
+
+						// Traverse vlanids
+						for (int vlan : vlanIds){
+
+							// ports has both Internal and External ports of node nodename
+							// and vlanId as vlan
+
+							HashSet<Integer> ports = obj.getPortsHavingVlanId(nodeName, vlan);
+
+							/* Now, we have all the ports tagged with vlanId as vlan
+							 * and we can rewrite the flood flow on these specific vlans;
+							 */
+
+						}
+
 
 
 

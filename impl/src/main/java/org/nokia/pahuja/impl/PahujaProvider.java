@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.nokia.pahuja.InitialFlowWriter.InitialStaticFlowWriter;
 import org.nokia.pahuja.macLearning.MacTable;
-import org.nokia.pahuja.topologyManager.NetworkTopology;
+import org.nokia.pahuja.topologyManager.InternalNetworkTopology;
 import org.nokia.pahuja.topologyManager.NodeStats;
 import org.nokia.pahuja.utils.InventoryUtils;
 import org.nokia.pahuja.vlanCheck.Vlans;
@@ -227,13 +227,14 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 
         	 // Neighbor Details:
         	 LLDP lldpPakcet = (LLDP) ethPkt.getPayload();
+
              try {
 				String neighborNodePortValue = new String(lldpPakcet.getPortId().getValue(), "UTF-8");
 
 				String neighborNodeName = new String(lldpPakcet.getSystemNameId().getValue(), "UTF-8");
 
 
-				new NetworkTopology().addNodeConnector(selfNodeName, Integer.parseInt(selfNodePortValue), neighborNodeName, Integer.parseInt(neighborNodePortValue.substring(1, 2)));
+				new InternalNetworkTopology().addNodeConnector(selfNodeName, Integer.parseInt(selfNodePortValue), neighborNodeName, Integer.parseInt(neighborNodePortValue.substring(1, 2)));
 
 			  } catch (UnsupportedEncodingException e) {
 
@@ -295,7 +296,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 		if (portStatus == "down"){
 
 			// remove port from Topology
-			new NetworkTopology().removeNodeConnector(nodeName, portNo);
+			new InternalNetworkTopology().removeNodeConnector(nodeName, portNo);
 
 			// remove port from NodeStats
 			new NodeStats().removePort(nodeName, portNo);
@@ -305,7 +306,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 
 			/*  when a new port is added,
 			 *  1) add the port to nodeName
-			 *  2) tag the port as Vlan 0
+			 *  2) No Vlan should be tagged to this port
 			 *  which by default does nothing
 			 */
 
@@ -328,7 +329,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 		System.out.println(nodeName);
 
 		// remove node from Network Topology
-		new NetworkTopology().removeNode(nodeName);
+		new InternalNetworkTopology().removeNode(nodeName);
 
 		// remove node from NodeStats
 		new NodeStats().removeNode(nodeName);
@@ -355,7 +356,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 		//observed that this method was called twice for every node
 		// hence we will maintain a list to counter any override.
 
-		boolean result = new NetworkTopology().containsNode(nodeName);
+		boolean result = new InternalNetworkTopology().containsNode(nodeName);
 
 		// Node already exists and flows already added
 
@@ -371,7 +372,7 @@ public class PahujaProvider implements BindingAwareProvider, AutoCloseable, Pack
 			// add node to NodeStats
 			new NodeStats().addNode(nodeName);
 			// add node To Network Topology
-			new NetworkTopology().addNode(nodeName);
+			new InternalNetworkTopology().addNode(nodeName);
 
 
 

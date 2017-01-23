@@ -13,8 +13,8 @@ import java.util.List;
 
 public interface Nodes {
 
-	public HashMap<Integer,HashSet<Integer>> getInternalPorts(String nodeName);
-	public HashSet<Integer> getExternalPorts(String nodeName);
+	public HashSet<Integer> getInternalPorts(String nodeName);
+	public HashMap<Integer, HashSet<Integer>> getExternalPorts(String nodeName);
 	public HashMap<Integer,HashSet<Integer>> getAllPorts(String nodeName);
 
 	public void addPort(String nodeName, int portNo);
@@ -28,5 +28,6 @@ public interface Nodes {
 	boolean containsNode(String nodeName);
 	boolean containsPort(String nodeName, int portNo);
 	boolean validateVlan(List<Integer> vlanIds);
+	HashSet<Integer> getPortsHavingVlanId(String nodeName, int vlanId);
 
 }
